@@ -1,0 +1,22 @@
+---
+
+version: 2.1 # version of the circleci config file, can be 2.0, 2.1, etc.
+# version of the circleci config file which should be 2.1 or above
+
+workflows: # all workflows in circleci are defined under workflows keyword
+    version: 2 # version of the workflow, can be 2, 3, etc.
+    test-worflow: # name of the workflow, can be anything (unique name)
+        jobs: # all jobs in the workflow are defined under jobs keyword
+            - build # name of the job, can be anything (unique name) which we will configure below
+
+
+jobs: # all jobs in circleci are defined under jobs keyword
+    build: # name of the job, can be anything (unique name)
+       # here we are setting up the execution environment for the job which is docker container of node image
+        docker: # executor type, can be docker, machine, macos, windows, etc.
+          - image: circleci/node:13.8.0 # docker image to use for this job, can be any docker image
+        steps: # steps to execute in the job, can be any command or script
+          - checkout # checkout the code from the repository, this is a built-in step in circleci
+          - run: node --version && npm --version # run the command to check the npm version, this is a built-in step in circleci
+
+...
