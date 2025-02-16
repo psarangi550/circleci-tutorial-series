@@ -1,22 +1,37 @@
----
+version: 2.1 #
 
-version: 2.1 # version of the circleci config file, can be 2.0, 2.1, etc.
-# version of the circleci config file which should be 2.1 or above
+jobs: # jobs related configuration will present in jobs keyword
+    build: # name of the job
+        docker: # docker related configuration will present in docker keyword
+            # this will be the primary image in this case
+            - image: circleci/python:3.6.2-stretch-browsers  # circleci convience image
+              # this image has the support python with web browser
+              environment: # environment related configuration will present in environment keyword
+                TEST_DATABASE_URL : postgresql://root@localhost/circle_test?sslmode=disable
+                # Database URL for testing purposes with SSL disabled
+            - image: circleci/postgres:9.6.2-alpine # circleci convience image for postgres database
+        steps: # steps related configuration will present in steps keyword
+            - checkout # checkout the code from the repository
+            - run: # run the command in the shell
+                name: installing pql client for the communication
+                command: sudo apt-get install postgresql-client-9.6 # install the postgresql client
+            - run: # checking the user as which is the user
+                command: whoami # print the user name
+            - run:
+                name: creating the table named as test
+                command: | # testing the connnection as below
+                    psql -d $TEST_DATABASE_URL -c "CREATE TABLE test (name char(25));"
+            - run:
+                name: Inserting element to the Table
+                command: | # testing the connnection as below
+                    psql -d $TEST_DATABASE_URL -c "INSERT INTO test (name) VALUES ('circleci');"
 
-workflows: # all workflows in circleci are defined under workflows keyword
-    version: 2 # version of the workflow, can be 2, 3, etc.
-    test-worflow: # name of the workflow, can be anything (unique name)
-        jobs: # all jobs in the workflow are defined under jobs keyword
-            - build # name of the job, can be anything (unique name) which we will configure below
+            - run:
+                name: selecting all entry from test DB
+                command: | # testing the connnection as below
+                   psql -d $TEST_DATABASE_URL -c "SELECT * FROM test;"
 
-
-jobs: # all jobs in circleci are defined under jobs keyword
-    build: # name of the job, can be anything (unique name)
-       # here we are setting up the execution environment for the job which is docker container of node image
-        docker: # executor type, can be docker, machine, macos, windows, etc.
-          - image: circleci/node:13.8.0 # docker image to use for this job, can be any docker image
-        steps: # steps to execute in the job, can be any command or script
-          - checkout # checkout the code from the repository, this is a built-in step in circleci
-          - run: node --version && npm --version # run the command to check the npm version, this is a built-in step in circleci
-
-...
+workflows: # workflows related configuration will present in workflows keyword
+   build_workflow:
+        jobs: # jobs related configuration will present in jobs keyword
+            - build # name of the job
